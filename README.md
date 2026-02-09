@@ -2,7 +2,86 @@
 
 A cognitive framework for chest X-ray analysis with multi-label pathology classification.
 
-![Architecture](docs/architecture.png)
+```mermaid
+graph TD
+    %% Node Styles
+    classDef tensor fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+    classDef module fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,rx:10,ry:10;
+    classDef process fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+
+    subgraph Inputs
+        Img[Multi-View Images]:::tensor
+        Ind[Clinical Indication]:::tensor
+        Concepts[Concept Bank]:::tensor
+    end
+
+    subgraph "Phase 1: Perception (PRO-FA)"
+        Backbone[ConvNeXt Backbone]:::module
+        Img --> Backbone
+        
+        Pixel[Pixel Tokens]:::tensor
+        Organ[Organ Token]:::tensor
+        Backbone --> Pixel
+        Backbone --> Organ
+        
+        RegionAttn(Region Attention):::process
+        Pixel --> RegionAttn
+        RegionAttn --> Region[Region Tokens]:::tensor
+        
+        Align(Concept Alignment):::process
+        Concepts --> Align
+        Region <--> Align
+    end
+
+    subgraph "Phase 2: Reasoning (MIX-MLP)"
+        ViewAttn(View Fusion):::process
+        Organ --> ViewAttn
+        ViewAttn --> Fused[Fused Features]:::tensor
+        
+        Residual(Residual Path):::process
+        Expansion(Expansion Path):::process
+        
+        Fused --> Residual
+        Fused --> Expansion
+        
+        Add(Add & Norm):::process
+        Residual --> Add
+        Expansion --> Add
+        
+        ClassHead(Classification Head):::module
+        Add --> ClassHead
+        ClassHead --> Logits[Pathology Probabilities]:::tensor
+    end
+
+    subgraph "Phase 3: Verification (RCTA)"
+        Prompter(Label Prompter):::process
+        Logits --> Prompter
+        Prompter --> LabelEmb[Label Embeddings]:::tensor
+        
+        CTA1(Step A: Context):::process
+        Organ --> CTA1
+        Ind --> CTA1
+        
+        CTA2(Step B: Hypothesis):::process
+        CTA1 --> CTA2
+        LabelEmb --> CTA2
+        
+        CTA3(Step C: Verify):::process
+        CTA2 --> CTA3
+        Pixel --> CTA3
+        
+        CTA3 --> Verified[Verified Features]:::tensor
+    end
+
+    subgraph Output
+        Decoder(Report Decoder):::module
+        Verified --> Decoder
+        Decoder --> Report[Structured Report]:::tensor
+    end
+
+    %% Cross-phase connections
+    Region -.->|MIL Supervision| ClassHead
+```
 
 ## Overview
 
