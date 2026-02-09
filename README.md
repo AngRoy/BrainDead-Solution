@@ -10,15 +10,15 @@ CogRRG implements a three-stage cognitive pipeline for CXR analysis:
 
 1. **PRO-FA** - Progressive Region-Organ Feature Alignment for hierarchical visual perception
 2. **MIX-MLP** - Dual-path classifier for multi-label pathology detection
-3. **RCTA** - Recursive Closed-loop Triangular Attention for hypothesis verification
+3. **Phase 4** - Retrieval-Augmented Generation (RAG) for grounded report synthesis
 
 ## Results
 
-| Metric | Validation | Holdout |
-|--------|------------|---------|
-| Micro-F1 | 0.778 | 0.774 |
-| Macro-F1 | 0.730 | 0.714 |
-| Mean AP | 0.735 | 0.760 |
+| Model / Phase | Micro-F1 | Macro-F1 | mAP |
+|---------------|----------|----------|-----|
+| **Phase 2 (Multi-View)** | 0.778 | 0.730 | 0.735 |
+| **Phase 3 (PRO-FA)** | 0.814 | 0.717 | - |
+| **Phase 4 (Retrieval)** | 0.401 | 0.230 | - |
 
 ## Installation
 
@@ -39,7 +39,7 @@ BrainDead-Solution/
 ├── models/
 │   ├── encoder.py           # PRO-FA implementation
 │   ├── classifier.py        # MIX-MLP with view attention
-│   └── decoder.py           # RCTA verification module
+│   └── retrieval.py         # Phase 4 Retrieval-Augmented Generation
 ├── training/
 │   ├── losses.py            # Masked BCE and PRO-FA losses
 │   └── trainer.py           # Training loop with AMP
@@ -105,3 +105,4 @@ with torch.no_grad():
 1. **Phase 1**: Smoke test on 12K samples (label validation)
 2. **Phase 2**: Full training with progressive backbone unfreezing
 3. **Phase 3**: PRO-FA concept alignment training
+4. **Phase 4**: Retrieval-based report generation (inference only)
