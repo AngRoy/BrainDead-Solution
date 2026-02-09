@@ -105,17 +105,3 @@ with torch.no_grad():
 1. **Phase 1**: Smoke test on 12K samples (label validation)
 2. **Phase 2**: Full training with progressive backbone unfreezing
 3. **Phase 3**: PRO-FA concept alignment training
-
-## Citation
-
-```bibtex
-@article{cogrrrg2024,
-  title={CogRRG: A Cognitive Framework for Structured Chest X-Ray Report Generation},
-  author={Anonymous},
-  year={2024}
-}
-```
-
-## License
-
-MIT
